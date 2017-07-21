@@ -1,25 +1,35 @@
 import requests
-
 from bs4 import BeautifulSoup
 
+def spider(url):
+   list = []
+   source_code = requests.get(url)
+   plain_text = source_code.text
+   soup = BeautifulSoup(plain_text, 'html.parser')
 
+   for link in soup.select('.list_news li dt a'):
+      title = link.string
+      href = link.get('href');
+      dic = {'title' : title, 'href' : href}
+      list.append(dic)
 
-def spider(max_pages):
+   return list
 
-   page = 1
+def htmlGenerator(list):
+   f = open("test.html",'w')
+   f_str = '';
+   template_top = '<!doctype><html><head></head><body>'
+   template_bottom = '</body></html>'
 
-   while page < max_pages:
+   f_str += template_top
 
-      url = 'url' + str(page)
+   for item in list:
+      div = '<div><a href='+ item['href'] + '>' + item['title'] + '</a></div>'
+      f_str += div
 
-      source_code = requests.get(url)
+   f_str += template_bottom
+   f.write(f_str)
 
-      plain_text = source_code.text
+   f.close()
 
-      soup = BeautifulSoup(plain_text, 'html.parser')
-
-      for link in soup.select('header h2'):
-         title = link.string
-         print(title)
-
-      page += 1
+htmlGenerator(spider('url'))
